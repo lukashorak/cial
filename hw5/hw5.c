@@ -21,13 +21,13 @@ int max(int a, int b) {
 	}
 }
 
-int input_segments(int maxBucket) {
+unsigned int input_segments() {
 	//Initialize variables
-	int n;
-	puts("Number of segments :");
-	scanf("%d", &n);
-	if (n < maxBucket) {
-		printf("n is smaller than largest bucket ( %d )", n);
+	unsigned int n;
+	puts("Number of bits of same prefix :");
+	scanf("%u", &n);
+	if (n < 0 || n > 32) {
+		printf("n have to be between 0 and 32");
 		return -1;
 	}
 
@@ -59,9 +59,24 @@ unsigned long char_to_ip(char* str, unsigned long *ip, unsigned int *len) {
 
 	int result = sscanf(str, "%d.%d.%d.%d/%d", &p1, &p2, &p3, &p4, &plen);
 	if (result == 5) {
-		//printf("%d.%d.%d.%d/%d\n", p1, p2, p3, p4, plen);
+		printf("%d.%d.%d.%d/%d\t", p1, p2, p3, p4, plen);
 		*ip = (p1 << 24) + (p2 << 16) + (p3 << 8) + p4;
 		*len = plen;
+		return 1;
+	} else if (result == 4) {
+		//In case the len is missing
+		*ip = (p1 << 24) + (p2 << 16) + (p3 << 8) + p4;
+		*len = 32;
+		if (p4 == 0) {
+			*len = 24;
+			if (p3 == 0) {
+				*len = 16;
+				if (p2 == 0) {
+					*len = 8;
+				}
+			}
+		}
+		printf("%d.%d.%d.%d/(%d)\t", p1, p2, p3, p4, *len);
 		return 1;
 	}
 	return 0;
@@ -143,7 +158,7 @@ int input(char* fileName, int size, int *lineCount, unsigned long IP[],
 		} else {
 			puts("ERROR");
 		}
-		printf("%d /%d\n", ip, plen);
+		printf("%lu /%d\n", ip, plen);
 	}
 	//printf("Total number of prefixes in input file:%d\n", linePos);
 	fclose(fr); /* close the file prior to exiting the routine */
@@ -169,11 +184,11 @@ int length_distribution(int size, unsigned int Len[], unsigned int Dist[33]) {
 	//}
 	printf("====\n");
 	for (i = 0; i < 33; i++) {
-		printf("%3d ", i);
+		printf("%3u ", i);
 	}
 	printf("\n");
 	for (i = 0; i < 33; i++) {
-		printf("%3d ", Dist[i]);
+		printf("%3u ", Dist[i]);
 	}
 	printf("\n");
 	return 1;
@@ -246,14 +261,14 @@ int segment(unsigned int d, int size, unsigned long IP[], unsigned int Len[]) {
 		print_ip_with_len(IP[i], Len[i]);
 		printf("  \t");
 		//printBits((int) IP[i], d);
-		process((int) IP[i], d);
+		process((long) IP[i], d);
 
 		if (Len[i] < d) {
 			printf("Don't fit - TODO\t");
-			unsigned int m = ((int) IP[i] >> (32 - d + 1));
+			unsigned long m = ((long) IP[i] >> (32 - d + 1));
 			int s = max(0, d - Len[i]);
 			for (j = 0; j < groupCount; j++) {
-				unsigned int g = ((int) group[j] >> s);
+				unsigned long g = ((long) group[j] >> s);
 				int c = (m == g);
 				if (c != 0) {
 					printf("%d %d %d\t", m, s, g);
@@ -262,7 +277,7 @@ int segment(unsigned int d, int size, unsigned long IP[], unsigned int Len[]) {
 			}
 
 		} else {
-			unsigned int m = ((int) IP[i] >> (32 - d + 1));
+			unsigned long m = ((int) IP[i] >> (32 - d + 1));
 			for (j = 0; j < groupCount; j++) {
 				int c = (m == group[j]);
 				if (c != 0) {
@@ -284,12 +299,12 @@ int segment(unsigned int d, int size, unsigned long IP[], unsigned int Len[]) {
 	return 1;
 }
 
-void process(unsigned int i, unsigned int d) {
-	unsigned int mask = pow(2, d);
-	unsigned int j = i >> d;
-	unsigned int m = (i >> (32 - d + 1));
+void process(unsigned long i, unsigned long d) {
+	unsigned long mask = pow(2, d);
+	unsigned long j = i >> d;
+	unsigned long m = (i >> (32 - d + 1));
 
-	printf("%d\t %d\t %d\t", i, j, m);
+	printf("%u\t %u\t %u\t", i, j, m);
 	//print_binary(j, 8);
 	//printf("\n");
 }
@@ -358,7 +373,7 @@ int main(int argc, char **argv) {
 
 	for (i = 0; i < lineCount; i++) {
 		print_ip_with_len(IP[i], Len[i]);
-		printf("\t -->\t%d\n", IP[i]);
+		printf("\t -->\t%lu\n", IP[i]);
 	}
 
 	puts("finished3");
@@ -372,7 +387,7 @@ int main(int argc, char **argv) {
 	puts("finished4");
 	puts("start5 - length distribution");
 
-	unsigned int d = 9;
+	unsigned int d = input_segments();
 	int works5 = segment(d, lineCount, &IP, &Len);
 	if (!works5) {
 		puts("ERROR - 5");
