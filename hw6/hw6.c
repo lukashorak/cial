@@ -35,23 +35,38 @@ union number_union_64 {
 	double d;
 };
 
-//assumes little endian
-void printBits(size_t const size, void const * const ptr)
-{
-    unsigned char *b = (unsigned char*) ptr;
-    unsigned char byte;
-    int i, j;
+struct number_bitfield {
+	unsigned int i :32;
+	//unsigned long l :64;
+};
+struct number_bitfield_32_pattern {
+	unsigned int sign :1;
+	unsigned int exp_sign :1;
+	unsigned int exp :7;
+	unsigned int mantissa :23;
+};
 
-    for (i=size-1;i>=0;i--)
-    {
-        for (j=7;j>=0;j--)
-        {
-            byte = b[i] & (1<<j);
-            byte >>= j;
-            printf("%u", byte);
-        }
-    }
-    puts("");
+struct number_bitfield_64 {
+	unsigned int sign :1;
+	unsigned int exp_sign :1;
+	unsigned int exp :10;
+	unsigned long mantissa :52;
+};
+
+//assumes little endian
+void printBits(size_t const size, void const * const ptr) {
+	unsigned char *b = (unsigned char*) ptr;
+	unsigned char byte;
+	int i, j;
+
+	for (i = size - 1; i >= 0; i--) {
+		for (j = 7; j >= 0; j--) {
+			byte = b[i] & (1 << j);
+			byte >>= j;
+			printf("%u", byte);
+		}
+	}
+	puts("");
 }
 
 int input_pointer() {
@@ -110,27 +125,32 @@ void print_bitpattern_float(float d) {
 int main(int argc, char **argv) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 
+	run_test();
+
 	union number_union_32 uf;
 
 	uf.f = 1.234f;
 
-	printf("%d",uf.i);
+	printf("%d", uf.i);
+	printf("\n");
+	printf("%e", uf.f);
 
 	printf("\n");
-
+	printf("\n");
 	//float i = 1.234f;
 	printBits(sizeof(uf.i), &(uf.i));
-
 
 	union number_union_64 ud;
 
 	ud.d = 1.2345678;
 	printBits(sizeof(ud.l), &(ud.l));
-
-
-
-
 	printf("\n");
+
+	struct number_bitfield bf;
+
+	float f_value = 1.234f;
+	bf.i = *(int*)&f_value;
+	printBits(4, &bf);
 }
 int main2(int argc, char **argv) {
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -145,19 +165,18 @@ int main2(int argc, char **argv) {
 	//char str[255];
 
 	//char str [] = "1.23";
-	char str [] = "1.23456789";
+	char str[] = "1.23456789";
 	printf("Input 1. float or double number 2. bit pattern :\n>");
 	//scanf("%s", &str);
 
-
-	sscanf(str,"%f",&in_float);
-	sscanf(str,"%lf",&in_double);
+	sscanf(str, "%f", &in_float);
+	sscanf(str, "%lf", &in_double);
 	printf("========================\n");
 	printf("%15.15e\n%15.15e\n", in_float, in_double);
 	printf("========================\n");
 
 	//in_float = (float) in_double;
-	if (in_float ==(float) in_double) {
+	if (in_float == (float) in_double) {
 		printf("%.5e == %e", in_float, in_double);
 	} else {
 		printf("%.5e != %e", in_float, in_double);
