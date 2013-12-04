@@ -37,7 +37,7 @@ union number_union_64 {
 
 struct number_bitfield {
 	unsigned int i :32;
-	//unsigned long l :64;
+//unsigned long l :64;
 };
 struct number_bitfield_32_pattern {
 	unsigned int sign :1;
@@ -122,7 +122,187 @@ void print_bitpattern_float(float d) {
 	printf("\n");
 }
 
+void convert_union_32() {
+	//char word[64];
+	//scanf("%s", &word);
+	//char word[] = "1101";
+	char word[] = "00111111110000000000000000000000";
+
+	//fgets(word, 63, stdin);
+	//word[63] = 0;
+	int len = strlen(&word);
+
+	printf("Word : %s\n", word);
+	printf("Len : %d\n", len);
+
+	if (len == 32) {
+
+	}
+
+	int i = 0;
+	unsigned long r = 0;
+	char * bin = &word;
+	for (i = 0; i < len; i++) {
+		r = r * 2 + (bin[i] == '1' ? 1 : 0);
+	}
+	printf("Decimal is : %d\n", r);
+
+	union number_union_32 u_float;
+	u_float.i = r;
+	printf("Float is : %f\n", u_float.f);
+
+	printf("\n");
+}
+
+void convert_union_64() {
+	//char word[64];
+	//scanf("%s", &word);
+	//char word[] = "1101";
+	char word[] =
+			"0011111111111000000000000000000000000000000000000000000000000000";
+
+	//fgets(word, 63, stdin);
+	//word[63] = 0;
+	int len = strlen(&word);
+
+	printf("Word : %s\n", word);
+	printf("Len : %d\n", len);
+
+	if (len == 64) {
+
+	}
+
+	int i = 0;
+	unsigned long r = 0;
+	char * bin = &word;
+	for (i = 0; i < len; i++) {
+		r = r * 2 + (bin[i] == '1' ? 1 : 0);
+	}
+	printf("Decimal is : %lu\n", r);
+
+	union number_union_64 u_doule;
+	u_doule.l = r;
+	printf("Double is : %f\n", u_doule.d);
+
+	printf("\n");
+}
+
+void convert_pointer_32() {
+	//char word[64];
+	//scanf("%s", &word);
+	//char word[] = "1101";
+	char word[] = "00111111110000000000000000000000";
+
+	//fgets(word, 63, stdin);
+	//word[63] = 0;
+	int len = strlen(&word);
+
+	printf("Word : %s\n", word);
+	printf("Len : %d\n", len);
+
+	int i = 0;
+	unsigned long r = 0;
+	char * bin = &word;
+	for (i = 0; i < len; i++) {
+		r = r * 2 + (bin[i] == '1' ? 1 : 0);
+	}
+	printf("Decimal is : %d\n", r);
+
+	//Pointer
+	int *p;
+	//Float variable
+	float f;
+	//Make the pointer point to the address where the float f is
+	p = &f;
+	//Change the value where pointer p points (the float f), but treat it as it is unsigned long
+	*p = r;
+
+	printf("Float is : %f\n", f);
+	printf("\n");
+}
+
+void convert_pointer_64() {
+	//char word[64];
+	//scanf("%s", &word);
+	//char word[] = "1101";
+	char word[] =
+			"0011111111111000000000000000000000000000000000000000000000000000";
+
+	//fgets(word, 63, stdin);
+	//word[63] = 0;
+	int len = strlen(&word);
+
+	printf("Word : %s\n", word);
+	printf("Len : %d\n", len);
+
+	int i = 0;
+	uint64_t r = 0;
+	char * bin = &word;
+	for (i = 0; i < len; i++) {
+		r = r * 2 + (bin[i] == '1' ? 1 : 0);
+	}
+	printf("Decimal is : %lu\n", r);
+
+	//Pointer
+	long *p;
+	//Double variable
+	double d;
+	//Make the pointer point to the address where the double d is
+	p = &d;
+	//Change the value where pointer p points (the double d), but treat it as it is unsigned long
+	*p = r;
+
+	printf("Double is : %f\n", d);
+	printf("\n");
+}
+
+void convert_bit_field_32() {
+	//char word[64];
+	//scanf("%s", &word);
+	//char word[] = "1101";
+	char word[] = "00111111110000000000000000000000";
+
+	//fgets(word, 63, stdin);
+	//word[63] = 0;
+	int len = strlen(&word);
+
+	printf("Word : %s\n", word);
+	printf("Len : %d\n", len);
+
+	int i = 0;
+	unsigned long r = 0;
+	char * bin = &word;
+	for (i = 0; i < len; i++) {
+		r = r * 2 + (bin[i] == '1' ? 1 : 0);
+	}
+	printf("Decimal is : %d\n", r);
+
+	float f;
+
+	printf("Float is : %f\n", f);
+	printf("\n");
+}
+
 int main(int argc, char **argv) {
+
+	printf("Pointer - 32bit Float\n");
+	convert_pointer_32();
+	printf("\n");
+	//printf("Pointer - 64bit Double\n");
+	//convert_pointer_64();
+	//printf("\n");
+	printf("Union - 32bit Float\n");
+	convert_union_32();
+	printf("\n");
+	//printf("Union - 64bit Double\n");
+	//convert_union_64();
+	//printf("\n");
+
+	printf("Bit field - 32bit Float\n");
+	convert_bit_field_32();
+	printf("\n");
+}
+int main3(int argc, char **argv) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 	run_test();
@@ -149,7 +329,7 @@ int main(int argc, char **argv) {
 	struct number_bitfield bf;
 
 	float f_value = 1.234f;
-	bf.i = *(int*)&f_value;
+	bf.i = *(int*) &f_value;
 	printBits(4, &bf);
 }
 int main2(int argc, char **argv) {
