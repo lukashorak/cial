@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include <string.h>
 /*DECLARATIONS*/
 #define DEBUG 1
 #define N 1000
@@ -122,15 +123,15 @@ void print_bitpattern_float(float d) {
 	printf("\n");
 }
 
-void convert_union_32() {
+void convert_union_32(char *word) {
 	//char word[64];
 	//scanf("%s", &word);
 	//char word[] = "1101";
-	char word[] = "00111111110000000000000000000000";
+	//char word[] = "00111111110000000000000000000000";
 
 	//fgets(word, 63, stdin);
 	//word[63] = 0;
-	int len = strlen(&word);
+	int len = strlen(word);
 
 	printf("Word : %s\n", word);
 	printf("Len : %d\n", len);
@@ -141,7 +142,7 @@ void convert_union_32() {
 
 	int i = 0;
 	unsigned long r = 0;
-	char * bin = &word;
+	char * bin = word;
 	for (i = 0; i < len; i++) {
 		r = r * 2 + (bin[i] == '1' ? 1 : 0);
 	}
@@ -154,16 +155,15 @@ void convert_union_32() {
 	printf("\n");
 }
 
-void convert_union_64() {
+void convert_union_64(char *word) {
 	//char word[64];
 	//scanf("%s", &word);
 	//char word[] = "1101";
-	char word[] =
-			"0011111111111000000000000000000000000000000000000000000000000000";
+	//char word[] =	"0011111111111000000000000000000000000000000000000000000000000000";
 
 	//fgets(word, 63, stdin);
 	//word[63] = 0;
-	int len = strlen(&word);
+	int len = strlen(word);
 
 	printf("Word : %s\n", word);
 	printf("Len : %d\n", len);
@@ -174,7 +174,7 @@ void convert_union_64() {
 
 	int i = 0;
 	unsigned long r = 0;
-	char * bin = &word;
+	char * bin = word;
 	for (i = 0; i < len; i++) {
 		r = r * 2 + (bin[i] == '1' ? 1 : 0);
 	}
@@ -187,22 +187,22 @@ void convert_union_64() {
 	printf("\n");
 }
 
-void convert_pointer_32() {
+void convert_pointer_32(char *word) {
 	//char word[64];
 	//scanf("%s", &word);
 	//char word[] = "1101";
-	char word[] = "00111111110000000000000000000000";
+	//char word[] = "00111111110000000000000000000000";
 
 	//fgets(word, 63, stdin);
 	//word[63] = 0;
-	int len = strlen(&word);
+	int len = strlen(word);
 
 	printf("Word : %s\n", word);
 	printf("Len : %d\n", len);
 
 	int i = 0;
 	unsigned long r = 0;
-	char * bin = &word;
+	char *bin = word;
 	for (i = 0; i < len; i++) {
 		r = r * 2 + (bin[i] == '1' ? 1 : 0);
 	}
@@ -221,23 +221,22 @@ void convert_pointer_32() {
 	printf("\n");
 }
 
-void convert_pointer_64() {
+void convert_pointer_64(char *word) {
 	//char word[64];
 	//scanf("%s", &word);
 	//char word[] = "1101";
-	char word[] =
-			"0011111111111000000000000000000000000000000000000000000000000000";
+	//char word[] ="0011111111111000000000000000000000000000000000000000000000000000";
 
 	//fgets(word, 63, stdin);
 	//word[63] = 0;
-	int len = strlen(&word);
+	int len = strlen(word);
 
 	printf("Word : %s\n", word);
 	printf("Len : %d\n", len);
 
 	int i = 0;
 	uint64_t r = 0;
-	char * bin = &word;
+	char * bin = word;
 	for (i = 0; i < len; i++) {
 		r = r * 2 + (bin[i] == '1' ? 1 : 0);
 	}
@@ -283,16 +282,117 @@ void convert_bit_field_32() {
 	printf("\n");
 }
 
+int read_input(char *value, int flag_32bit) {
+	char word[64] = "";
+	scanf("%s", &word);
+	int len = strlen(&word);
+
+	int flag_binary = 1;
+
+	int flag_floating = 0;
+
+	int i;
+	for (i = 0; i < len; i++) {
+		char c = word[i];
+		if (c != '0' && c != '1') {
+			flag_binary = 0;
+		}
+		printf("%c ", c);
+	}
+
+	if (flag_binary) {
+		if (flag_32bit) {
+			int n = 32 - len;
+			char zeros[32] = "";
+
+			for (i = 0; i < n; i++) {
+				strcat(zeros, "0");
+			}
+			strcat(zeros, word);
+			strcpy(word, zeros);
+		} else {
+			int n = 64 - len;
+			char zeros[64] = "";
+
+			for (i = 0; i < n; i++) {
+				strcat(zeros, "0");
+			}
+			strcat(zeros, word);
+			strcpy(word, zeros);
+		}
+	}
+
+	double d;
+	if (sscanf(word, "%lf", &d) == 1) {
+		flag_floating = 1;
+	}
+
+	printf("\n");
+	printf("Word :%s\n", word);
+	printf("Word filled:%s\n", word);
+	printf("Len :%d\n", len);
+	printf("flag_binary :%d\n", flag_binary);
+	printf("flag_floating :%d\n", flag_floating);
+	printf("Floating conversion 64:%.10lf\n", d);
+	printf("Floating conversion 32:%.10f\n", (float) d);
+
+	strcpy(value, word);
+	printf("Value :%s\n", value);
+	printf("\n");
+
+	if (flag_binary) {
+		return 1;
+	}
+	if (flag_floating) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
 int main(int argc, char **argv) {
 
+	int flag_32bit = 1;
+	char word[64];
+	char *w = word;
+	//word = w;
+	int flag_from_binary_to_floating = read_input(w, flag_32bit);
+	printf("Word outside :%s\n", w);
+
+	if (flag_from_binary_to_floating) {
+
+		if (flag_32bit) {
+			printf("Pointer - 32bit Float\n");
+			convert_pointer_32(w);
+			printf("\n");
+			printf("Union - 32bit Float\n");
+			convert_union_32(w);
+			printf("\n");
+		} else {
+			printf("Pointer - 64bit Float\n");
+			convert_pointer_64(w);
+			printf("\n");
+			printf("Union - 64bit Float\n");
+			convert_union_64(w);
+			printf("\n");
+		}
+	}
+
+	printf("\n");
+
+}
+
+int main_bin_to_floating(int argc, char **argv) {
+
+	char word[] = "00111111110000000000000000000000";
+
 	printf("Pointer - 32bit Float\n");
-	convert_pointer_32();
+	convert_pointer_32(&word);
 	printf("\n");
 	//printf("Pointer - 64bit Double\n");
 	//convert_pointer_64();
 	//printf("\n");
 	printf("Union - 32bit Float\n");
-	convert_union_32();
+	convert_union_32(&word);
 	printf("\n");
 	//printf("Union - 64bit Double\n");
 	//convert_union_64();
