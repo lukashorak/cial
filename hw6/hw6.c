@@ -225,7 +225,7 @@ void convert_pointer_64(char *word, int flag_to_binary) {
 
 	if (flag_to_binary) {
 		double f;
-		sscanf(word, "%f", &f);
+		sscanf(word, "%lf", &f);
 		//Pointer to float
 		double *p;
 		//long variable
@@ -246,7 +246,7 @@ void convert_pointer_64(char *word, int flag_to_binary) {
 		for (i = 0; i < len; i++) {
 			r = r * 2 + (bin[i] == '1' ? 1 : 0);
 		}
-		printf("Decimal is : %lu\n", r);
+
 
 		//Pointer
 		long *p;
@@ -258,6 +258,7 @@ void convert_pointer_64(char *word, int flag_to_binary) {
 		*p = r;
 
 		printf("Double is : %f\n", d);
+		printf("Decimal is : %lu\n", r);
 	}
 	printf("\n");
 }
@@ -358,7 +359,7 @@ int read_input(char *value, int flag_32bit) {
 }
 int main(int argc, char **argv) {
 
-	int flag_32bit = 1;
+	int flag_32bit = 0;
 	char word[64];
 	char *w = word;
 	//word = w;
@@ -375,10 +376,10 @@ int main(int argc, char **argv) {
 			convert_union_32(w, 0);
 			printf("\n");
 		} else {
-			printf("Pointer - 64bit Float\n");
+			printf("Pointer - 64bit Double\n");
 			convert_pointer_64(w, 0);
 			printf("\n");
-			printf("Union - 64bit Float\n");
+			printf("Union - 64bit Double\n");
 			convert_union_64(w, 0);
 			printf("\n");
 		}
@@ -392,12 +393,17 @@ int main(int argc, char **argv) {
 			convert_union_32(w, 1);
 			printf("\n");
 		} else {
-
+			printf("Pointer - 64bit Double\n");
+			convert_pointer_64(w, 1);
+			printf("\n");
+			printf("Union - 64bit Double\n");
+			convert_union_64(w, 1);
+			printf("\n");
 		}
 	}
 
 	printf("\n");
-
+	return 0;
 }
 
 int main_bin_to_floating(int argc, char **argv) {
