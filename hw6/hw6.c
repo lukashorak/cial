@@ -59,36 +59,6 @@ void printBits(size_t const size, void const * const ptr) {
 	puts("");
 }
 
-int input_pointer() {
-
-	return 1;
-}
-
-int input_union() {
-
-}
-
-int input_bit_field() {
-
-}
-
-void run_test() {
-	float f1, f2, f3;
-	f1 =
-			1.175494350822287507968736537222245677818665556772087521508751706278417259454727172851560500000000000000000000000000000000e-38f;
-	f2 = 1.175494350822287500e-38f;
-	f3 = 0x00800000;
-	print_bitpattern_float(f1);
-	print_bitpattern_float(f2);
-	print_bitpattern_float(f3);
-
-	if (f1 == f2) {
-		printf("%100e = %100e", f1, f2);
-	} else {
-		printf("%100e != %100e", f1, f2);
-	}
-	printf("\n");
-}
 
 void print_bitpattern_double(double d) {
 	//double decker = 1.0;
@@ -358,8 +328,12 @@ int read_input(char *value, int flag_32bit) {
 	}
 }
 int main(int argc, char **argv) {
+	setvbuf(stdout, NULL, _IONBF, 0);
+	printf("Use 32bit(1) or 64bit(0) :\n");
+	int flag_32bit = 1;
+	scanf("%c",&flag_32bit);
 
-	int flag_32bit = 0;
+	printf("Write input to convert 1. floating point number 1.9 or binary representation:\n");
 	char word[64];
 	char *w = word;
 	//word = w;
@@ -403,105 +377,5 @@ int main(int argc, char **argv) {
 	}
 
 	printf("\n");
-	return 0;
-}
-
-int main_bin_to_floating(int argc, char **argv) {
-
-	char word[] = "00111111110000000000000000000000";
-
-	printf("Pointer - 32bit Float\n");
-	convert_pointer_32(&word, 0);
-	printf("\n");
-//printf("Pointer - 64bit Double\n");
-//convert_pointer_64();
-//printf("\n");
-	printf("Union - 32bit Float\n");
-	convert_union_32(&word, 0);
-	printf("\n");
-//printf("Union - 64bit Double\n");
-//convert_union_64();
-//printf("\n");
-
-	printf("Bit field - 32bit Float\n");
-	convert_bit_field_32();
-	printf("\n");
-}
-int main3(int argc, char **argv) {
-	setvbuf(stdout, NULL, _IONBF, 0);
-
-	run_test();
-
-	union number_union_32 uf;
-
-	uf.f = 1.234f;
-
-	printf("%d", uf.i);
-	printf("\n");
-	printf("%e", uf.f);
-
-	printf("\n");
-	printf("\n");
-//float i = 1.234f;
-	printBits(sizeof(uf.i), &(uf.i));
-
-	union number_union_64 ud;
-
-	ud.d = 1.2345678;
-	printBits(sizeof(ud.l), &(ud.l));
-	printf("\n");
-
-	struct number_bitfield bf;
-
-	float f_value = 1.234f;
-	bf.i = *(int*) &f_value;
-	printBits(4, &bf);
-}
-int main2(int argc, char **argv) {
-	setvbuf(stdout, NULL, _IONBF, 0);
-//float f1, f2;
-
-//int byte = 10;
-//char byte = 10;
-	run_test();
-
-	float in_float;
-	double in_double;
-//char str[255];
-
-//char str [] = "1.23";
-	char str[] = "1.23456789";
-	printf("Input 1. float or double number 2. bit pattern :\n>");
-//scanf("%s", &str);
-
-	sscanf(str, "%f", &in_float);
-	sscanf(str, "%lf", &in_double);
-	printf("========================\n");
-	printf("%15.15e\n%15.15e\n", in_float, in_double);
-	printf("========================\n");
-
-//in_float = (float) in_double;
-	if (in_float == (float) in_double) {
-		printf("%.5e == %e", in_float, in_double);
-	} else {
-		printf("%.5e != %e", in_float, in_double);
-	}
-	printf("\n");
-
-	float M = 1.0f;
-
-	print_bitpattern_float(M);
-	printf("\n");
-	union {
-		int i;
-		float f;
-	} u;
-
-// Convert floating-point bits to integer:
-	u.f = 3.14159f;
-	printf("As integer: %08x\n", u.i);
-	u.i = 1234567890;
-	printf("As float: %f\n", u.f);
-	printf("finished");
 	return 0;
 }
