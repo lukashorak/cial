@@ -132,7 +132,7 @@ void printSingleBucket(bucket_type b) {
 	putchar('\n');
 }
 
-int loadBucketsFromFile(bucket_type buckets[10]) {
+int loadBucketsFromFile(bucket_type buckets[10], int *largest_bucket) {
 
 	char* filename = "buckets_sample.in";
 	int i;
@@ -164,6 +164,7 @@ int loadBucketsFromFile(bucket_type buckets[10]) {
 			}
 			buckets[i].id = linearray;
 			buckets[i].size = j;
+			*largest_bucket = max(*largest_bucket, j);
 		}
 		fclose(file);
 
@@ -306,16 +307,24 @@ int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
 
 void mainLoad(char** args) {
 	//mainFinal(args);
+	int N = 3;
+	int largest_bucket;
 	int i = 10;
 	int j = 10;
 	bucket_type buckets[10];
-	int n = loadBucketsFromFile(&buckets);
+	int n = loadBucketsFromFile(&buckets, &largest_bucket);
+
+	printf("LARGEST BUCKET:%d\n", largest_bucket);
+	if (N < largest_bucket) {
+		printf("N is too small (%d < %d)!", N, largest_bucket);
+		return;
+	}
 
 	bucket_type out_buckets[n];
 	int bucket_index[n];
 	int original_bucket_index[n];
 	int out_bucket_sizeP;
-	int out_bucket_size = combine(n, 4, &buckets, &out_buckets,
+	int out_bucket_size = combine(n, N, &buckets, &out_buckets,
 			&out_bucket_sizeP, &original_bucket_index, &bucket_index);
 
 	printf("\nOUT BUCKETS:\n");
@@ -327,6 +336,10 @@ void mainLoad(char** args) {
 		printf("%d --> %d --> %d\n", original_bucket_index[i], i,
 				bucket_index[i]);
 	}
+
+	double compression_ratio = (float) out_bucket_size / (float) n;
+	printf("COMPRESSION RATIO(N=%d):%d / %d = %.2f\n", N, out_bucket_size, n,
+			compression_ratio);
 
 	printf("Select Method as in Readme {A,B,C}:");
 	char method;
