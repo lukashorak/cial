@@ -34,42 +34,55 @@ int sortTest(int argc, char* argv[]) {
 	return 0;
 }
 
-void methodA() {
+void methodA(bucket_type buckets[]) {
 	printf("input a sorted bucket index:");
 	int sorted_bucket_index;
 	scanf("%d", &sorted_bucket_index);
 
-	int old_index = 5;
+	int old_index = buckets[sorted_bucket_index].old_index;
 	printf("corresponding old index: %d\n", old_index);
 }
 
-void methodB() {
+void methodB(int n, int original_bucket_index[n], int bucket_index[n]) {
 	printf("input a old index:");
 	int old_index;
 	scanf("%d", &old_index);
+	int i;
+	int new_index;
+	for (i = 0; i < n; i++) {
+		if (original_bucket_index[i] == old_index) {
+			new_index = bucket_index[i];
+			break;
+		}
+	}
 
-	int new_index = 2;
 	printf("corresponding new bucket index: %d\n", new_index);
 }
 
-void methodC() {
+void methodC(int n, int original_bucket_index[n], int bucket_index[n]) {
 	printf("input a new index:");
 	int new_index;
 	scanf("%d", &new_index);
 
-	int contain = 123;
+	int contain = 0;
+	int old_indices_array[n];
+	int i;
+	for (i = 0; i < n; i++) {
+		if (bucket_index[i] == new_index) {
 
-	int old_indices_array[3] = { 3, 7, 11 };
+			old_indices_array[contain] = original_bucket_index[i];
+			contain++;
+		}
+	}
 
 	printf("how many original buckets are contained in new bucket: %d\n",
 			contain);
 	printf("all the old indices stored in that new bucket:\n");
 
-	int size = sizeof(old_indices_array) / sizeof(int);
-	int i;
-	for (i = 0; i < size; i++) {
-		printf("%d\n", old_indices_array[i]);
+	for (i = 0; i < contain; i++) {
+		printf("%d ", old_indices_array[i]);
 	}
+	printf("\n");
 }
 
 void mainFinal(char** args) {
@@ -81,15 +94,15 @@ void mainFinal(char** args) {
 	switch (method) {
 	case 'A':
 		printf("A\n");
-		methodA();
+		//methodA();
 		break;
 	case 'B':
 		printf("B\n");
-		methodB();
+		//methodB();
 		break;
 	case 'C':
 		printf("C\n");
-		methodC();
+		//methodC();
 		break;
 	}
 
@@ -226,9 +239,8 @@ bucket_type bucket_union_struct(bucket_type in1, bucket_type in2) {
 	return r;
 }
 
-int combine(int n, bucket_type buckets[10], bucket_type out_buckets[10],
-		int *out_bucket_size, int bucket_index[n]) {
-
+int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
+		int *out_bucket_size, int original_bucket_index[n], int bucket_index[n]) {
 	int i, k;
 	int pos = 0;
 	for (i = 0; i < n; i++) {
@@ -242,7 +254,7 @@ int combine(int n, bucket_type buckets[10], bucket_type out_buckets[10],
 			r.old_index = -1;
 			printSingleBucket(r);
 
-			if (r.size <= 4) {
+			if (r.size <= N) {
 				printf("FIT %d-->%d\n", i, pos);
 				int z;
 				for (z = 0; z < out_buckets[k].size; z++) {
@@ -259,7 +271,6 @@ int combine(int n, bucket_type buckets[10], bucket_type out_buckets[10],
 				fit = 1;
 
 				bucket_index[i] = k;
-
 				break;
 			}
 		}
@@ -277,13 +288,17 @@ int combine(int n, bucket_type buckets[10], bucket_type out_buckets[10],
 		printf("\n");
 	}
 
-	printf("\nOUT BUCKETS:\n");
-	printBuckets(pos, out_buckets);
+	/*
+	 printf("\nOUT BUCKETS:\n");
+	 printBuckets(pos, out_buckets);
 
-	printf("\nBUCKET MAPPING:\n");
-	for (i = 0; i < n; i++) {
-		printf("%d --> %d\n", i, bucket_index[i]);
-	}
+	 printf("\nBUCKET MAPPING:\n");
+	 for (i = 0; i < n; i++) {
+	 original_bucket_index[i] = buckets[i].old_index;
+	 printf("%d --> %d --> %d\n", original_bucket_index[i], i,
+	 bucket_index[i]);
+	 }
+	 */
 
 	*out_bucket_size = pos;
 	return pos;
@@ -296,43 +311,43 @@ void mainLoad(char** args) {
 	bucket_type buckets[10];
 	int n = loadBucketsFromFile(&buckets);
 
-	bucket_type out_buckets[10];
+	bucket_type out_buckets[n];
 	int bucket_index[n];
+	int original_bucket_index[n];
 	int out_bucket_sizeP;
-	int out_bucket_size = combine(n, &buckets, &out_buckets, &out_bucket_sizeP,
-			&bucket_index);
+	int out_bucket_size = combine(n, 4, &buckets, &out_buckets,
+			&out_bucket_sizeP, &original_bucket_index, &bucket_index);
 
 	printf("\nOUT BUCKETS:\n");
-
 	printBuckets(out_bucket_sizeP, out_buckets);
 
 	printf("\nBUCKET MAPPING:\n");
 	for (i = 0; i < n; i++) {
-		printf("%d --> %d\n", i, bucket_index[i]);
+		original_bucket_index[i] = buckets[i].old_index;
+		printf("%d --> %d --> %d\n", original_bucket_index[i], i,
+				bucket_index[i]);
 	}
 
-
-
 	printf("Select Method as in Readme {A,B,C}:");
-		char method;
-		scanf("%c", &method);
+	char method;
+	scanf("%c", &method);
 
-		switch (method) {
-		case 'A':
-			printf("A\n");
-			methodA();
-			break;
-		case 'B':
-			printf("B\n");
-			methodB();
-			break;
-		case 'C':
-			printf("C\n");
-			methodC();
-			break;
-		}
+	switch (method) {
+	case 'A':
+		printf("A\n");
+		methodA(buckets);
+		break;
+	case 'B':
+		printf("B\n");
+		methodB(n, original_bucket_index, bucket_index);
+		break;
+	case 'C':
+		printf("C\n");
+		methodC(n, original_bucket_index, bucket_index);
+		break;
+	}
 
-		printf("Finished");
+	printf("Finished");
 }
 
 void mainCombineTest() {
