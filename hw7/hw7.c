@@ -9,19 +9,22 @@ typedef struct {
 	int *id;
 } bucket_type;
 
-int comp(const void * elem1, const void * elem2) {
-	int f = *((int*) elem1);
-	int s = *((int*) elem2);
-	if (f > s)
-		return 1;
-	if (f < s)
+int compareBuckets(const void * elem1, const void * elem2) {
+	printf("SORT");
+	bucket_type f = *((bucket_type*) elem1);
+	bucket_type s = *((bucket_type*) elem2);
+	printf("#%d {%d} -- #%d {%d}\n", f.old_index, f.size, s.old_index, s.size);
+	if (f.size > s.size)
 		return -1;
+	if (f.size < s.size)
+		return 1;
 	return 0;
 }
+
 int sortTest(int argc, char* argv[]) {
 	int x[] = { 4, 5, 2, 3, 1, 0, 9, 8, 6, 7 };
 
-	qsort(x, sizeof(x) / sizeof(*x), sizeof(*x), comp);
+	qsort(x, sizeof(x) / sizeof(*x), sizeof(*x), compare_int);
 
 	int i;
 	for (i = 0; i < 10; i++) {
@@ -133,11 +136,11 @@ void mainFinal(char** args) {
 	printf("Finished");
 }
 
-void mainLoad(char** args, int array[][10], int size[]) {
+void mainLoad(char** args, bucket_type buckets[10]) {
 
 	char* filename = "buckets_sample.in";
 
-	bucket_type buckets[10];
+	//bucket_type buckets[10];
 
 	/*
 	 * Open the file.
@@ -156,32 +159,39 @@ void mainLoad(char** args, int array[][10], int size[]) {
 		 */
 		for (i = 0; fgets(buffer, sizeof buffer, file); ++i, j = 0) {
 			string = buffer;
-			//j = 0;
 			buckets[i].old_index = i;
-			int linearray[10];
+			int *linearray = calloc(10, sizeof(int));
 
+			//Fill the Array
 			while ((token = strsep(&string, " ")) != NULL) {
-				printf("%s ", token);
+				//printf("%s ", token);
 				sscanf(token, "%d", &linearray[j]);
-				array[i][j] = linearray[j];
 				j++;
 			}
 			buckets[i].id = linearray;
 			buckets[i].size = j;
-			size[i] = j;
 		}
 		fclose(file);
 		/*
 		 * Print the data in 'array'.
 		 */
 		for (j = 0; j < i; ++j) {
-			printf("array[%lu] ", (long unsigned) j);
-			printf(" {%d} :", size[j]);
-			for (k = 0; k < size[j]; ++k) {
-				printf("%4d ", array[j][k]);
+			printf("bucket (# %d) {%d} :", buckets[j].old_index,
+					buckets[j].size);
+			for (k = 0; k < buckets[j].size; ++k) {
+				printf("%4d ", buckets[j].id[k]);
 			}
 			putchar('\n');
 		}
+
+		//Sort
+
+		printf("SORTING BY SIZE\n");
+
+		qsort(buckets, 9, sizeof(bucket_type),
+				compareBuckets);
+//		qsort(buckets, sizeof(buckets) / sizeof(*buckets), sizeof(*buckets),
+//						compareBuckets);
 
 		for (j = 0; j < i; ++j) {
 			printf("bucket (# %d) {%d} :", buckets[j].old_index,
@@ -191,6 +201,7 @@ void mainLoad(char** args, int array[][10], int size[]) {
 			}
 			putchar('\n');
 		}
+
 	} else /* fopen() returned NULL */
 	{
 		perror(filename);
@@ -205,7 +216,6 @@ void main(char** args) {
 	//mainFinal(args);
 	int i = 10;
 	int j = 10;
-	int array[i][j];
-	int size[i];
-	mainLoad(args, &array, &size);
+	bucket_type buckets[10];
+	mainLoad(args, &buckets);
 }

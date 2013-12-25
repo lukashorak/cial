@@ -21,3 +21,13 @@ int max(int a, int b) {
 		return b;
 	}
 }
+
+int compare_int(const void * elem1, const void * elem2) {
+	int f = *((int*) elem1);
+	int s = *((int*) elem2);
+	if (f > s)
+		return 1;
+	if (f < s)
+		return -1;
+	return 0;
+}
