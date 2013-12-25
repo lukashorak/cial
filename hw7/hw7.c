@@ -7,6 +7,22 @@ typedef struct {
 	int *id;
 } bucket_type;
 
+int min(int a, int b) {
+	if (a > b) {
+		return b;
+	} else {
+		return a;
+	}
+}
+
+int max(int a, int b) {
+	if (a >= b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+
 int comp(const void * elem1, const void * elem2) {
 	int f = *((int*) elem1);
 	int s = *((int*) elem2);
@@ -27,6 +43,46 @@ int sortTest(int argc, char* argv[]) {
 	}
 
 	return 0;
+}
+
+int dataSize[99];
+int data[99][99];
+
+void readFromFile(char* fileName, int maxBucketSize) {
+	FILE *fr;
+	fr = fopen(fileName, "rt");
+
+	int linePos = 0;
+	//char line[280];
+	char* line = malloc(sizeof(char) * 280);
+
+	/* get a line, up to 80 chars from fr.  done if NULL */
+	while (fgets(line, 280, fr) != NULL) {
+
+		int fieldPos = 0;
+		char* pch;
+
+		printf("%d\t", linePos);
+		pch = strtok(line, " ");
+		while (pch != NULL) {
+			int value;
+			sscanf(pch, "%d", &value);
+
+			data[linePos][fieldPos] = value;
+
+			printf("%d ", value);
+			pch = strtok(NULL, " ");
+			fieldPos++;
+		}
+		dataSize[linePos] = fieldPos;
+		printf("\t(%d)\n", dataSize[linePos]);
+		linePos++;
+		maxBucketSize = max(maxBucketSize, fieldPos);
+
+	}
+
+	printf("Max bucket size = %d\n", maxBucketSize);
+	fclose(fr);
 }
 
 void methodA() {
