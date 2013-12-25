@@ -1,1 +1,3 @@
-hw7.d: ../hw7.c
+hw7.d: ../hw7.c ../util.h
+
+../util.h:
