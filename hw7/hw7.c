@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "util.h"
 #define ARRAYSIZE(x)  (sizeof(x)/sizeof(*(x)))
+#define BUCKET_SIZE 15000
+#define DEBUG 0
 
 typedef struct {
 	int old_index;
@@ -134,7 +136,8 @@ void printSingleBucket(bucket_type b) {
 
 int loadBucketsFromFile(bucket_type buckets[10], int *largest_bucket) {
 
-	char* filename = "buckets_sample.in";
+	char* filename = "buckets.in";
+	//char* filename = "buckets_sample.in";
 	int i;
 	/*
 	 * Open the file.
@@ -185,8 +188,6 @@ int loadBucketsFromFile(bucket_type buckets[10], int *largest_bucket) {
 	//readFromFile(filename, 10);
 }
 
-int BUCKET_SIZE = 10;
-
 bucket_type bucket_union_struct(bucket_type in1, bucket_type in2) {
 	bucket_type r;
 	int bucket_size = 0;
@@ -194,14 +195,16 @@ bucket_type bucket_union_struct(bucket_type in1, bucket_type in2) {
 	int *bucket_union = calloc(10, sizeof(int));
 	int i, j;
 
-	for (i = 0; i < in1.size; i++) {
-		printf("%d ", in1.id[i]);
+	if (DEBUG) {
+		for (i = 0; i < in1.size; i++) {
+			printf("%d ", in1.id[i]);
+		}
+		printf(" --+-- ");
+		for (i = 0; i < in2.size; i++) {
+			printf("%d ", in2.id[i]);
+		}
+		printf("  ===  ");
 	}
-	printf(" --+-- ");
-	for (i = 0; i < in2.size; i++) {
-		printf("%d ", in2.id[i]);
-	}
-	printf("  ===  ");
 
 	for (i = 0; i < in1.size; i++) {
 		bucket_union[i] = in1.id[i];
@@ -220,22 +223,22 @@ bucket_type bucket_union_struct(bucket_type in1, bucket_type in2) {
 			bucket_size++;
 		}
 	}
-
-	for (i = 0; i < bucket_size; i++) {
-		//b[i] = bucket_union[i];
-		printf("%d ", bucket_union[i]);
+	if (DEBUG) {
+		for (i = 0; i < bucket_size; i++) {
+			//b[i] = bucket_union[i];
+			printf("%d ", bucket_union[i]);
+		}
+		printf("\n");
 	}
-	printf("\n");
-
-	//bucket.values = bucket_union;
+//bucket.values = bucket_union;
 
 	r.id = bucket_union;
 	r.size = bucket_size;
-	//printf("Size :%d\n", r.size);
-	//for (i = 0; i < bucket_size; i++) {
-	//	printf("%d ", r.id[i]);
-	//}
-	//printf("\n");
+//printf("Size :%d\n", r.size);
+//for (i = 0; i < bucket_size; i++) {
+//	printf("%d ", r.id[i]);
+//}
+//printf("\n");
 
 	return r;
 }
@@ -253,19 +256,25 @@ int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
 		for (k = 0; k < pos; k++) {
 			bucket_type r = bucket_union_struct(buckets[i], out_buckets[k]);
 			r.old_index = -1;
-			printSingleBucket(r);
+			if (DEBUG) {
+				printSingleBucket(r);
+			}
 
 			if (r.size <= N) {
-				printf("FIT %d-->%d\n", i, pos);
+				if (DEBUG) {
+					printf("FIT %d-->%d\n", i, pos);
+				}
 				int z;
-				for (z = 0; z < out_buckets[k].size; z++) {
-					printf("%d ", out_buckets[k].id[z]);
+				if (DEBUG) {
+					for (z = 0; z < out_buckets[k].size; z++) {
+						printf("%d ", out_buckets[k].id[z]);
+					}
+					printf(" --->  ");
+					for (z = 0; z < r.size; z++) {
+						printf("%d ", r.id[z]);
+					}
+					printf("\n");
 				}
-				printf(" --->  ");
-				for (z = 0; z < r.size; z++) {
-					printf("%d ", r.id[z]);
-				}
-				printf("\n");
 				//out_buckets[pos].old_index = pos;
 				out_buckets[k].id = r.id;
 				out_buckets[k].size = r.size;
@@ -280,13 +289,17 @@ int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
 			out_buckets[pos].size = buckets[i].size;
 			out_buckets[pos].old_index = pos;
 			out_buckets[pos].id = buckets[i].id;
-			printf("NEW %d-->%d\n", i, pos);
+			if (DEBUG) {
+				printf("NEW %d-->%d\n", i, pos);
+			}
 			bucket_index[i] = pos;
 			pos++;
 		}
 
-		printBuckets(pos, out_buckets);
-		printf("\n");
+		if (DEBUG) {
+			printBuckets(pos, out_buckets);
+			printf("\n");
+		}
 	}
 
 	/*
@@ -306,12 +319,12 @@ int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
 }
 
 void mainLoad(char** args) {
-	//mainFinal(args);
-	int N = 3;
+//mainFinal(args);
+	int N = 8;
+
 	int largest_bucket;
-	int i = 10;
-	int j = 10;
-	bucket_type buckets[10];
+	int i;
+	bucket_type buckets[BUCKET_SIZE];
 	int n = loadBucketsFromFile(&buckets, &largest_bucket);
 
 	printf("LARGEST BUCKET:%d\n", largest_bucket);
@@ -319,47 +332,49 @@ void mainLoad(char** args) {
 		printf("N is too small (%d < %d)!", N, largest_bucket);
 		return;
 	}
+	for (N = 8; N < 24; N++) {
+		bucket_type out_buckets[n];
+		int bucket_index[n];
+		int original_bucket_index[n];
+		int out_bucket_sizeP;
+		int out_bucket_size = combine(n, N, &buckets, &out_buckets,
+				&out_bucket_sizeP, &original_bucket_index, &bucket_index);
 
-	bucket_type out_buckets[n];
-	int bucket_index[n];
-	int original_bucket_index[n];
-	int out_bucket_sizeP;
-	int out_bucket_size = combine(n, N, &buckets, &out_buckets,
-			&out_bucket_sizeP, &original_bucket_index, &bucket_index);
+		if (DEBUG) {
+			printf("\nOUT BUCKETS:\n");
+			printBuckets(out_bucket_sizeP, out_buckets);
 
-	printf("\nOUT BUCKETS:\n");
-	printBuckets(out_bucket_sizeP, out_buckets);
+			printf("\nBUCKET MAPPING:\n");
+			for (i = 0; i < n; i++) {
+				original_bucket_index[i] = buckets[i].old_index;
+				printf("%d --> %d --> %d\n", original_bucket_index[i], i,
+						bucket_index[i]);
+			}
+		}
 
-	printf("\nBUCKET MAPPING:\n");
-	for (i = 0; i < n; i++) {
-		original_bucket_index[i] = buckets[i].old_index;
-		printf("%d --> %d --> %d\n", original_bucket_index[i], i,
-				bucket_index[i]);
+		double compression_ratio = (float) out_bucket_size / (float) n;
+		printf("COMPRESSION RATIO(N=%d):%d / %d = %.2f\n", N, out_bucket_size,
+				n, compression_ratio);
 	}
+	/*printf("Select Method as in Readme {A,B,C}:");
+	 char method;
+	 scanf("%c", &method);
 
-	double compression_ratio = (float) out_bucket_size / (float) n;
-	printf("COMPRESSION RATIO(N=%d):%d / %d = %.2f\n", N, out_bucket_size, n,
-			compression_ratio);
-
-	printf("Select Method as in Readme {A,B,C}:");
-	char method;
-	scanf("%c", &method);
-
-	switch (method) {
-	case 'A':
-		printf("A\n");
-		methodA(buckets);
-		break;
-	case 'B':
-		printf("B\n");
-		methodB(n, original_bucket_index, bucket_index);
-		break;
-	case 'C':
-		printf("C\n");
-		methodC(n, original_bucket_index, bucket_index);
-		break;
-	}
-
+	 switch (method) {
+	 case 'A':
+	 printf("A\n");
+	 methodA(buckets);
+	 break;
+	 case 'B':
+	 printf("B\n");
+	 methodB(n, original_bucket_index, bucket_index);
+	 break;
+	 case 'C':
+	 printf("C\n");
+	 methodC(n, original_bucket_index, bucket_index);
+	 break;
+	 }
+	 */
 	printf("Finished");
 }
 
@@ -390,5 +405,5 @@ void mainCombineTest() {
 void main(char** args) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	mainLoad(args);
-	//mainCombineTest();
+//mainCombineTest();
 }
