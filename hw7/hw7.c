@@ -143,6 +143,8 @@ int loadBucketsFromFile(bucket_type buckets[10], int *largest_bucket) {
 	 * Open the file.
 	 */
 	FILE *file = fopen(filename, "r");
+
+	printf("OPEN FILE\n");
 	if (file) {
 		//int array[10][10];
 		//int size[10];
@@ -320,11 +322,14 @@ int combine(int n, int N, bucket_type buckets[10], bucket_type out_buckets[10],
 
 void mainLoad(char** args) {
 //mainFinal(args);
-	int N = 8;
+	int N = 7;
+
+	printf("START\n");
 
 	int largest_bucket;
 	int i;
 	bucket_type buckets[BUCKET_SIZE];
+	printf("LOAD\n");
 	int n = loadBucketsFromFile(&buckets, &largest_bucket);
 
 	printf("LARGEST BUCKET:%d\n", largest_bucket);
@@ -332,7 +337,7 @@ void mainLoad(char** args) {
 		printf("N is too small (%d < %d)!", N, largest_bucket);
 		return;
 	}
-	for (N = 8; N < 24; N++) {
+	for (N = largest_bucket; N <= 3 * largest_bucket; N++) {
 		bucket_type out_buckets[n];
 		int bucket_index[n];
 		int original_bucket_index[n];

@@ -1,1 +1,3 @@
-util.d: ../util.c
+util.d: ../util.c ../util.h
+
+../util.h:

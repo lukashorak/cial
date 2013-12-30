@@ -4,7 +4,8 @@
  *  Created on: 25 Dec 2013
  *      Author: Lukas
  */
- #include <stdio.h>
+#include <stdio.h>
+#include "util.h"
 
 int min(int a, int b) {
 	if (a > b) {
