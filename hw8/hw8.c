@@ -35,19 +35,21 @@ struct prefix readFile(char* fileName, int *lc) {
 	if (fr == 0) {
 		return list;
 	}
-	char line[280];
+	char line[80];
 
 	int lineCount = 0;
 	/* get a line, up to 80 chars from fr.  done if NULL */
-	while (fgets(line, 280, fr) != NULL) {
+	while (fgets(line, 80, fr) != NULL) {
 		lineCount++;
 		char* lineIn = line;
+
 		struct prefix p = parseIpFromChar(lineIn);
 		printStructPrefix(p);
 
-		if (list.ip == 0 && list.len == 0){
-			list = p;
-		}else{
+		if (list.ip == 0 && list.len == 0) {
+			list.ip = p.ip;
+			list.len = p.len;
+		} else {
 			list.next = &p;
 		}
 	}
@@ -85,6 +87,8 @@ void testRead() {
 	printf("File: %s :%d\n", fileName, lineCount);
 
 	printStructPrefixList(0, list);
+
+	printf(">>%d\n", list.len);
 }
 
 int main(int argc, const char* argv[]) {
