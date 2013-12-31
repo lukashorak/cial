@@ -7,6 +7,56 @@
 #include <stdio.h>
 #include "iputil.h"
 
+int scan_number_of_lines(char* fileName, int *lc) {
+	FILE *fr;
+
+	fr = fopen(fileName, "rt");
+	if (fr == 0) {
+		return 0;
+	}
+	char line[280];
+
+	int lineCount = 0;
+	/* get a line, up to 80 chars from fr.  done if NULL */
+	while (fgets(line, 280, fr) != NULL) {
+
+		lineCount++;
+	}
+
+	fclose(fr);
+	*lc = lineCount;
+	return 1;
+}
+
+struct prefix readFile(char* fileName, int *lc) {
+	struct prefix list;
+	FILE *fr;
+	fr = fopen(fileName, "rt");
+	if (fr == 0) {
+		return list;
+	}
+	char line[280];
+
+	int lineCount = 0;
+	/* get a line, up to 80 chars from fr.  done if NULL */
+	while (fgets(line, 280, fr) != NULL) {
+		lineCount++;
+		char* lineIn = line;
+		struct prefix p = parseIpFromChar(lineIn);
+		printStructPrefix(p);
+
+		if (list.ip == 0 && list.len == 0){
+			list = p;
+		}else{
+			list.next = &p;
+		}
+	}
+
+	fclose(fr);
+	*lc = lineCount;
+	return list;
+}
+
 void testParse() {
 
 	struct prefix p1;
@@ -27,8 +77,20 @@ void testParse() {
 	printStructPrefix(p4);
 }
 
+void testRead() {
+	char* fileName = "test.in";
+	int lineCount = 0;
+	struct prefix list = readFile(fileName, &lineCount);
+
+	printf("File: %s :%d\n", fileName, lineCount);
+
+	printStructPrefixList(0, list);
+}
+
 int main(int argc, const char* argv[]) {
-	testParse();
-	printf("Finished");
+	setvbuf(stdout, NULL, _IONBF, 0);
+	//testParse();
+	testRead();
+	printf("Finished\n");
 	return 0;
 }

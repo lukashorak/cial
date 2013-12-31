@@ -16,18 +16,34 @@ void print_ip_with_len(unsigned int ip, unsigned char len) {
 }
 
 void printStructPrefix(struct prefix p) {
-	printf("%d/%d\n", p.ip, p.len);
+	printf("%d/%d\t-->\t", p.ip, p.len);
 	print_ip_with_len(p.ip, p.len);
+}
+
+void printStructPrefixList(int pos, struct prefix list) {
+	if (pos == 0) {
+		printf("=== PRINT LIST OF PREFIXES ===\n");
+		if (list.ip == 0 && list.len == 0) {
+			printf("=EMPTY=\n");
+			return;
+		}
+	}
+	printf("%d\t", pos);
+	printStructPrefix(list);
+	if (list.next > 0) {
+		printStructPrefixList(pos + 1, *list.next);
+	}
+
 }
 
 struct prefix parseIpFromChar(char* line) {
 	unsigned int bytes[4];
 	unsigned int len;
-	printf("%s\n", line);
+	//printf("%s\n", line);
 	int v = sscanf(line, "%u.%u.%u.%u/%d", &bytes[3], &bytes[2], &bytes[1],
 			&bytes[0], &len);
-	printf("%d: %u.%u.%u.%u/%u\n", v, bytes[3], bytes[2], bytes[1], bytes[0],
-			len);
+	//printf("%d: %u.%u.%u.%u/%u\n", v, bytes[3], bytes[2], bytes[1], bytes[0],
+	//		len);
 
 	//If missing lenght - calculate it
 	if (v == 4) {
