@@ -71,7 +71,7 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 		struct prefix *list) {
 	struct prefix *curr = list;
 	struct prefix *prev = NULL;
-	printf("\Adding [%u / %u] \n", ip, len);
+	printf("Adding [%u / %u] \n", ip, len);
 
 	while (curr != NULL) {
 		if (curr->ip > ip) {
@@ -87,17 +87,57 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 	new->next = NULL;
 
 	//TODO - decide if it's first, last or in middle
-	if (prev == NULL) {
+	if (list == NULL || (list->ip == 0 && list->len == 0)) {
+		list = new;
+		printf("ADDED NEW LIST!\n");
+	} else if (prev == NULL) {
 		new->next = list;
 		list = new;
+		printf("ADDED FIRST!\n");
 	} else if (prev->next == NULL) {
 		prev->next = new;
+		printf("ADDED LAST!\n");
 	} else {
 		new->next = curr;
 		prev->next = new;
-
+		printf("ADDED MIDDLE!\n");
 	}
 	printf("ADDED!\n");
+
+	return list;
+}
+
+struct prefix* addSortedByPrefix(struct prefix *new, struct prefix *list) {
+	struct prefix *curr = list;
+	struct prefix *prev = NULL;
+	printf("Adding [%u / %u] \n", new->ip, new->len);
+
+	while (curr != NULL) {
+		if (curr->ip > new->ip) {
+			break;
+		} else {
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+	//new->next = NULL;
+
+	//TODO - decide if it's first, last or in middle
+	if (list == NULL || (list->ip == 0 && list->len == 0)) {
+		list = new;
+		printf("ADDED NEW LIST!\n");
+	} else if (prev == NULL) {
+		new->next = list;
+		list = new;
+		printf("ADDED FIRST!\n");
+	} else if (prev->next == NULL) {
+		prev->next = new;
+		printf("ADDED LAST!\n");
+	} else {
+		new->next = curr;
+		prev->next = new;
+		printf("ADDED MIDDLE!\n");
+	}
 
 	return list;
 }
@@ -194,7 +234,16 @@ void length_distribution(struct prefix *list, unsigned int distribution[33]) {
 void segment(int d, struct prefix *list) {
 
 	unsigned int groupNumber = power2(d);
-	int *groups = calloc(groupNumber, sizeof(int));
+	int *groupsCount = calloc(groupNumber, sizeof(int));
+	struct prefix *groupTooShort = calloc(1, sizeof(struct prefix));
+	//groupTooShort = NULL;
+
+	struct prefix *groups[groupNumber];
+	int i;
+	for (i = 0; i < groupNumber; i++) {
+		groups[i] = calloc(groupNumber, sizeof(struct prefix*));
+	}
+
 	int tooShortGroup = 0;
 
 	printf("\nCalculating Prefix Groups [2^%d -> %d]\n", d, groupNumber);
@@ -206,20 +255,30 @@ void segment(int d, struct prefix *list) {
 		printBits(sizeof(curr->ip), &(curr->ip));
 		if (curr->len < d) {
 			tooShortGroup++;
+			groupTooShort = addSorted(curr->ip, curr->len, groupTooShort);
 			printf("%u / %u -> tooShortGroup\n", curr->ip, curr->len);
 		} else {
-			group = (curr->ip >> (32 - d + 1));
+			group = (curr->ip >> (32 - d ));
+			printBits(sizeof(group), &group);
 			printf("%u / %u -> %d\n", curr->ip, curr->len, group);
-			groups[group]++;
+			groupsCount[group]++;
+			groups[group] = addSorted(curr->ip, curr->len, groups[group]);
+			//groups[group] = addSortedByPrefix(curr, groups[group]);
 		}
 		curr = curr->next;
 	}
 
-	int i;
 	printf("\n====\n");
 	printf("SHORT\t%5u\n", tooShortGroup);
 	for (i = 0; i < groupNumber; i++) {
-		printf("%u\t%5u\n", i, groups[i]);
+		printf("%u\t%5u\n", i, groupsCount[i]);
+	}
+
+	printf("\n==SHORT==\n");
+	printStructPrefixList(0, groupTooShort);
+	for (i = 0; i < groupNumber; i++) {
+		printf("\n== %d ==\n", i);
+		printStructPrefixList(0, groups[i]);
 	}
 }
 
