@@ -67,7 +67,42 @@ struct prefix* readFile(char* fileName, int *lc) {
 	return list;
 }
 
-int delete(unsigned int ip, unsigned char len, struct prefix *list) {
+struct prefix* addSorted(unsigned int ip, unsigned char len,
+		struct prefix *list) {
+	struct prefix *curr = list;
+	struct prefix *prev = NULL;
+	printf("\Adding [%u / %u] \n", ip, len);
+
+	while (curr != NULL) {
+		if (curr->ip > ip) {
+			break;
+		} else {
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+	struct prefix *new = (struct prefix*) malloc(sizeof(struct prefix));
+	new->ip = ip;
+	new->len = len;
+	new->next = NULL;
+
+	//TODO - decide if it's first, last or in middle
+	if (prev == NULL) {
+		new->next = list;
+		list = new;
+	} else if (prev->next == NULL) {
+		prev->next = new;
+	} else {
+		new->next = curr;
+		prev->next = new;
+
+	}
+	printf("ADDED!\n");
+
+	return list;
+}
+
+struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	struct prefix *curr = list;
 	struct prefix *prev = NULL;
@@ -87,6 +122,8 @@ int delete(unsigned int ip, unsigned char len, struct prefix *list) {
 	if (found) {
 		//TODO - decide if it's first, last or in middle
 		if (prev == NULL) {
+			//todo free
+			//free(list);
 			list = list->next;
 		} else if (curr->next == NULL) {
 			prev->next = NULL;
@@ -100,7 +137,7 @@ int delete(unsigned int ip, unsigned char len, struct prefix *list) {
 		printf("NOTHING!\n");
 	}
 
-	return found;
+	return list;
 }
 
 int search(unsigned int ip, unsigned char len, struct prefix *list) {
@@ -150,8 +187,8 @@ void testParse() {
 }
 
 void testRead() {
-	//char* fileName = "inserted_prefixes";
-	//char* fileName = "routing_table";
+//char* fileName = "inserted_prefixes";
+//char* fileName = "routing_table";
 	char* fileName = "test.in";
 	int lineCount = 0;
 	struct prefix *list = readFile(fileName, &lineCount);
@@ -163,14 +200,23 @@ void testRead() {
 	search(927091968, 24, list);
 	search(123, 24, list);
 
-	//printf(">>%d\n", list->len);
+//printf(">>%d\n", list->len);
 
 	printStructPrefixList(0, list);
 
-	//delete(927091968, 24, list);
-	delete(16909060, 32, list);
+//delete(927091968, 24, list);
+	list = delete(16909060, 32, list);
 
 	printStructPrefixList(0, list);
+
+	list = addSorted(16909060, 30, list);
+	list = addSorted(16909061, 31, list);
+	list = addSorted(169090601, 32, list);
+	list = addSorted(927091969, 8, list);
+
+
+	printStructPrefixList(0, list);
+	//list = delete(16909060, 32, list);
 }
 
 void testList() {
@@ -202,9 +248,9 @@ void testList() {
 }
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
-	//testParse();
+//testParse();
 	testRead();
-	//testList();
+//testList();
 	printf("Finished\n");
 	return 0;
 }
