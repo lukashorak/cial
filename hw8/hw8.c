@@ -191,6 +191,33 @@ void length_distribution(struct prefix *list, unsigned int distribution[33]) {
 	printf("\n");
 }
 
+void segment(int d, struct prefix *list) {
+
+	unsigned int groupNumber = power2(d);
+	int *groups = calloc(groupNumber, sizeof(int));
+
+	printf("\nCalculating Prefix Groups [2^%d -> %d]\n", d, groupNumber);
+
+	struct prefix *curr = list;
+	while (curr != NULL) {
+		unsigned int group = 0;
+
+		group = (curr->ip >> (32 - d + 1));
+
+		printBits(sizeof(curr->ip), &(curr->ip));
+		printf("%u -> %d\n", curr->ip, group);
+
+		groups[group]++;
+		curr = curr->next;
+	}
+
+	int i;
+	printf("\n====\n");
+	for (i = 0; i < groupNumber; i++) {
+		printf("%u\t%5u\n", i, groups[i]);
+	}
+}
+
 void testParse() {
 
 	struct prefix p1;
@@ -244,6 +271,8 @@ void testRead() {
 
 	unsigned int* distribution = calloc(33, sizeof(unsigned int));
 	length_distribution(list, distribution);
+
+	segment(2, list);
 }
 
 void testList() {

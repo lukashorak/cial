@@ -14,6 +14,8 @@ struct prefix {
 	struct prefix *next;
 };
 
+unsigned int power2(int b);
+void printBits(size_t const size, void const * const ptr);
 void print_ip_with_len(unsigned int ip, unsigned char len);
 void printStructPrefix(struct prefix p);
 struct prefix* parseIpFromChar(char* line);

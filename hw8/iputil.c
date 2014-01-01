@@ -5,7 +5,33 @@
  *      Author: Administrator
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include "iputil.h"
+
+unsigned int power2(int b) {
+	unsigned int v = 2;
+	int i;
+	for (i = 1; i < b; i++) {
+		v = v * 2;
+	}
+
+	return v;
+}
+
+void printBits(size_t const size, void const * const ptr) {
+	unsigned char *b = (unsigned char*) ptr;
+	unsigned char byte;
+	int i, j;
+
+	for (i = size - 1; i >= 0; i--) {
+		for (j = 7; j >= 0; j--) {
+			byte = b[i] & (1 << j);
+			byte >>= j;
+			printf("%u", byte);
+		}
+	}
+	puts("");
+}
 
 void print_ip_with_len(unsigned int ip, unsigned char len) {
 	unsigned char bytes[4];
@@ -64,7 +90,7 @@ struct prefix* parseIpFromChar(char* line) {
 	ip |= bytes[1] << 8;
 	ip |= bytes[2] << 16;
 	ip |= bytes[3] << 24;
-	struct prefix *ret =  (struct prefix*)malloc(sizeof(struct prefix));
+	struct prefix *ret = (struct prefix*) malloc(sizeof(struct prefix));
 	ret->ip = ip;
 	ret->len = len;
 	ret->next = NULL;
