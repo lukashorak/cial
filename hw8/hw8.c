@@ -9,8 +9,10 @@
 #include "iputil.h"
 
 int insertCounter = 0;
+int insertFrequency[100000] = { 0 };
 int searchCounter = 0;
 int removeCounter = 0;
+int removeFrequency[100000] = { 0 };
 
 int scan_number_of_lines(char* fileName, int *lc) {
 	FILE *fr;
@@ -77,6 +79,7 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 	struct prefix *prev = NULL;
 	printf("Adding [%u / %u] \n", ip, len);
 
+	insertCounter = 0;
 	while (curr != NULL) {
 		insertCounter++;
 		if (curr->ip > ip) {
@@ -86,11 +89,13 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 			curr = curr->next;
 		}
 	}
+	insertFrequency[insertCounter]++;
 	struct prefix *new = (struct prefix*) malloc(sizeof(struct prefix));
 	new->ip = ip;
 	new->len = len;
 	new->next = NULL;
 
+	printf("%d\t", insertCounter);
 	//TODO - decide if it's first, last or in middle
 	if (list == NULL || (list->ip == 0 && list->len == 0)) {
 		list = new;
@@ -107,7 +112,6 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 		prev->next = new;
 		printf("ADDED MIDDLE!\n");
 	}
-	printf("ADDED!\n");
 
 	return list;
 }
@@ -153,8 +157,8 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 	struct prefix *prev = NULL;
 	int found = 0;
 
-	printf("\nDeleting [%u / %u] \n", ip, len);
-
+	printf("\nDeleting [%u / %u] \t", ip, len);
+	removeCounter = 0;
 	while (curr != NULL) {
 		removeCounter++;
 		if (curr->ip == ip && curr->len == len) {
@@ -165,7 +169,9 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 			curr = curr->next;
 		}
 	}
+
 	if (found) {
+		removeFrequency[removeCounter]++;
 		//TODO - decide if it's first, last or in middle
 		if (prev == NULL) {
 			//todo free
@@ -178,7 +184,7 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 			prev->next = curr->next;
 			free(curr);
 		}
-		printf("DELETED!\n");
+		printf("DELETED! %d\n", removeCounter);
 	} else {
 		printf("NOTHING!\n");
 	}
@@ -281,10 +287,10 @@ void segment(int d, struct prefix *list) {
 	}
 
 	printf("\n==SHORT==\n");
-	printStructPrefixList(0, groupTooShort);
+	printStructPrefixList(groupTooShort);
 	for (i = 0; i < groupNumber; i++) {
 		printf("\n== %d ==\n", i);
-		printStructPrefixList(0, groups[i]);
+		printStructPrefixList(groups[i]);
 	}
 }
 
@@ -317,26 +323,26 @@ void testRead() {
 
 	printf("File: %s :%d\n", fileName, lineCount);
 
-	printStructPrefixList(0, list);
+	printStructPrefixList(list);
 
 	search(927091968, 24, list);
 	search(123, 24, list);
 
 //printf(">>%d\n", list->len);
 
-	printStructPrefixList(0, list);
+	printStructPrefixList(list);
 
 //delete(927091968, 24, list);
 	list = delete(16909060, 32, list);
 
-	printStructPrefixList(0, list);
+	printStructPrefixList(list);
 
 	list = addSorted(16909060, 30, list);
 	list = addSorted(16909061, 31, list);
 	list = addSorted(169090601, 32, list);
 	list = addSorted(927091969, 8, list);
 
-	printStructPrefixList(0, list);
+	printStructPrefixList(list);
 	//list = delete(16909060, 32, list);
 
 	unsigned int* distribution = calloc(33, sizeof(unsigned int));
@@ -369,8 +375,20 @@ void testList() {
 	new3->ip = 167168;
 	new3->len = 16;
 
-	printStructPrefixList(0, list);
+	printStructPrefixList(list);
 
+}
+
+void printSummary() {
+	printf("==== SUMMARY ====\n");
+
+	int i;
+	for (i = 0; i < 5000; i++) {
+		printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
+	}
+	printf("Insert:\t%d\n", insertCounter);
+	printf("Search:\t%d\n", searchCounter);
+	printf("Remove:\t%d\n", removeCounter);
 }
 
 void run() {
@@ -383,23 +401,25 @@ void run() {
 	struct prefix *insertList = input(insertName, &lineCount);
 	struct prefix *removeList = input(removeName, &lineCount);
 
-	struct prefix *curr = insertList;
-	while (curr != NULL) {
-		routingList = addSorted(curr->ip, curr->len, routingList);
-		curr = curr->next;
-	}
-	curr = removeList;
-	while (curr != NULL) {
-		routingList = delete(curr->ip, curr->len, routingList);
-		curr = curr->next;
-	}
+	printStructPrefixList(routingList);
 
-	printStructPrefixList(0, routingList);
+//	struct prefix *curr = insertList;
+//	while (curr != NULL) {
+//		routingList = addSorted(curr->ip, curr->len, routingList);
+//		curr = curr->next;
+//	}
 
-	printf("==== SUMMARY ====\n");
-	printf("Insert:\t%d\n", insertCounter);
-	printf("Search:\t%d\n", searchCounter);
-	printf("Remove:\t%d\n", removeCounter);
+	//printStructPrefixList(0, routingList);
+
+//	curr = removeList;
+//	while (curr != NULL) {
+//		routingList = delete(curr->ip, curr->len, routingList);
+//		curr = curr->next;
+//	}
+//
+//	printStructPrefixList(0, routingList);
+
+	//printSummary();
 }
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);

@@ -47,7 +47,24 @@ void printStructPrefix(struct prefix p) {
 	print_ip_with_len(p.ip, p.len);
 }
 
-void printStructPrefixList(int pos, struct prefix *list) {
+void printStructPrefixList(struct prefix *list) {
+	printf("=== PRINT LIST OF PREFIXES ===\n");
+	if (list->ip == 0 && list->len == 0) {
+		printf("=EMPTY=\n");
+	}
+	int pos = 0;
+
+	struct prefix *curr = list;
+
+	while (curr != NULL) {
+		printf("%d\t", pos);
+		printStructPrefix(*curr);
+		curr = curr->next;
+		pos++;
+	}
+
+}
+void printStructPrefixList2(int pos, struct prefix *list) {
 	if (pos == 0) {
 		printf("=== PRINT LIST OF PREFIXES ===\n");
 		if (list->ip == 0 && list->len == 0) {
@@ -58,7 +75,7 @@ void printStructPrefixList(int pos, struct prefix *list) {
 	printf("%d\t", pos);
 	printStructPrefix(*list);
 	if (list->next > 0) {
-		printStructPrefixList(pos + 1, list->next);
+		printStructPrefixList2(pos + 1, list->next);
 	}
 
 }

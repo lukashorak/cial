@@ -19,6 +19,7 @@ void printBits(size_t const size, void const * const ptr);
 void print_ip_with_len(unsigned int ip, unsigned char len);
 void printStructPrefix(struct prefix p);
 struct prefix* parseIpFromChar(char* line);
-void printStructPrefixList(int pos, struct prefix *list);
+void printStructPrefixList(struct prefix *list);
+void printStructPrefixList2(int pos, struct prefix *list);
 
 #endif /* IPUTIL_H_ */
