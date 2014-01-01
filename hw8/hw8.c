@@ -29,7 +29,7 @@ int scan_number_of_lines(char* fileName, int *lc) {
 	return 1;
 }
 
-struct prefix* readFile(char* fileName, int *lc) {
+struct prefix* input(char* fileName, int *lc) {
 	struct prefix *list = (struct prefix*) malloc(sizeof(struct prefix));
 	list->ip = 0;
 	list->len = 0;
@@ -106,7 +106,7 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	struct prefix *curr = list;
 	struct prefix *prev = NULL;
-	int found;
+	int found = 0;
 
 	printf("\nDeleting [%u / %u] \n", ip, len);
 
@@ -140,7 +140,7 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 	return list;
 }
 
-int search(unsigned int ip, unsigned char len, struct prefix *list) {
+struct prefix* search(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	struct prefix *curr = list;
 	int found = 0;
@@ -158,12 +158,37 @@ int search(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	if (found) {
 		printf("FOUND!\n");
-		return 1;
+		return curr;
 	} else {
 		printf("NOTHING!\n");
 		return NULL;
 	}
-	return 0;
+}
+
+void length_distribution(struct prefix *list, unsigned int distribution[33]) {
+
+	struct prefix *curr = list;
+	printf("\nCalculating Prefix Length Distribution\n");
+
+	while (curr != NULL) {
+		distribution[curr->len]++;
+		curr = curr->next;
+	}
+
+	int i;
+	printf("\n====\n");
+	for (i = 0; i < 33; i++) {
+		printf("%u\t%5u\n", i, distribution[i]);
+	}
+	printf("====\n");
+	for (i = 0; i < 33; i++) {
+		printf("%5u ", i);
+	}
+	printf("\n");
+	for (i = 0; i < 33; i++) {
+		printf("%5u ", distribution[i]);
+	}
+	printf("\n");
 }
 
 void testParse() {
@@ -187,11 +212,11 @@ void testParse() {
 }
 
 void testRead() {
-//char* fileName = "inserted_prefixes";
-//char* fileName = "routing_table";
+	//char* fileName = "inserted_prefixes";
+	//char* fileName = "routing_table";
 	char* fileName = "test.in";
 	int lineCount = 0;
-	struct prefix *list = readFile(fileName, &lineCount);
+	struct prefix *list = input(fileName, &lineCount);
 
 	printf("File: %s :%d\n", fileName, lineCount);
 
@@ -214,9 +239,11 @@ void testRead() {
 	list = addSorted(169090601, 32, list);
 	list = addSorted(927091969, 8, list);
 
-
 	printStructPrefixList(0, list);
 	//list = delete(16909060, 32, list);
+
+	unsigned int* distribution = calloc(33, sizeof(unsigned int));
+	length_distribution(list, distribution);
 }
 
 void testList() {
