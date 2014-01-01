@@ -67,6 +67,68 @@ struct prefix* readFile(char* fileName, int *lc) {
 	return list;
 }
 
+int delete(unsigned int ip, unsigned char len, struct prefix *list) {
+
+	struct prefix *curr = list;
+	struct prefix *prev = NULL;
+	int found;
+
+	printf("\nDeleting [%u / %u] \n", ip, len);
+
+	while (curr != NULL) {
+		if (curr->ip == ip && curr->len == len) {
+			found = 1;
+			break;
+		} else {
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+	if (found) {
+		//TODO - decide if it's first, last or in middle
+		if (prev == NULL) {
+			list = list->next;
+		} else if (curr->next == NULL) {
+			prev->next = NULL;
+			free(curr);
+		} else {
+			prev->next = curr->next;
+			free(curr);
+		}
+		printf("DELETED!\n");
+	} else {
+		printf("NOTHING!\n");
+	}
+
+	return found;
+}
+
+int search(unsigned int ip, unsigned char len, struct prefix *list) {
+
+	struct prefix *curr = list;
+	int found = 0;
+
+	printf("\nSearching the list for value [%u / %u] \n", ip, len);
+
+	while (curr != NULL) {
+		if (curr->ip == ip && curr->len == len) {
+			found = 1;
+			break;
+		} else {
+			curr = curr->next;
+		}
+	}
+
+	if (found) {
+		printf("FOUND!\n");
+		return 1;
+	} else {
+		printf("NOTHING!\n");
+		return NULL;
+	}
+	return 0;
+}
+
 void testParse() {
 
 	struct prefix p1;
@@ -88,9 +150,9 @@ void testParse() {
 }
 
 void testRead() {
-	char* fileName = "inserted_prefixes";
+	//char* fileName = "inserted_prefixes";
 	//char* fileName = "routing_table";
-	//char* fileName = "test.in";
+	char* fileName = "test.in";
 	int lineCount = 0;
 	struct prefix *list = readFile(fileName, &lineCount);
 
@@ -98,7 +160,17 @@ void testRead() {
 
 	printStructPrefixList(0, list);
 
+	search(927091968, 24, list);
+	search(123, 24, list);
+
 	//printf(">>%d\n", list->len);
+
+	printStructPrefixList(0, list);
+
+	//delete(927091968, 24, list);
+	delete(16909060, 32, list);
+
+	printStructPrefixList(0, list);
 }
 
 void testList() {
