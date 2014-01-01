@@ -195,6 +195,7 @@ void segment(int d, struct prefix *list) {
 
 	unsigned int groupNumber = power2(d);
 	int *groups = calloc(groupNumber, sizeof(int));
+	int tooShortGroup = 0;
 
 	printf("\nCalculating Prefix Groups [2^%d -> %d]\n", d, groupNumber);
 
@@ -202,17 +203,21 @@ void segment(int d, struct prefix *list) {
 	while (curr != NULL) {
 		unsigned int group = 0;
 
-		group = (curr->ip >> (32 - d + 1));
-
 		printBits(sizeof(curr->ip), &(curr->ip));
-		printf("%u -> %d\n", curr->ip, group);
-
-		groups[group]++;
+		if (curr->len < d) {
+			tooShortGroup++;
+			printf("%u / %u -> tooShortGroup\n", curr->ip, curr->len);
+		} else {
+			group = (curr->ip >> (32 - d + 1));
+			printf("%u / %u -> %d\n", curr->ip, curr->len, group);
+			groups[group]++;
+		}
 		curr = curr->next;
 	}
 
 	int i;
 	printf("\n====\n");
+	printf("SHORT\t%5u\n", tooShortGroup);
 	for (i = 0; i < groupNumber; i++) {
 		printf("%u\t%5u\n", i, groups[i]);
 	}
