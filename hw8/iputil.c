@@ -4,6 +4,7 @@
  *  Created on: Dec 31, 2013
  *      Author: Administrator
  */
+#include <stdlib.h>
 #include "iputil.h"
 
 void print_ip_with_len(unsigned int ip, unsigned char len) {
@@ -16,27 +17,27 @@ void print_ip_with_len(unsigned int ip, unsigned char len) {
 }
 
 void printStructPrefix(struct prefix p) {
-	printf("%d/%d\t-->\t", p.ip, p.len);
+	printf("%u/%d\t-->\t", p.ip, p.len);
 	print_ip_with_len(p.ip, p.len);
 }
 
-void printStructPrefixList(int pos, struct prefix list) {
+void printStructPrefixList(int pos, struct prefix *list) {
 	if (pos == 0) {
 		printf("=== PRINT LIST OF PREFIXES ===\n");
-		if (list.ip == 0 && list.len == 0) {
+		if (list->ip == 0 && list->len == 0) {
 			printf("=EMPTY=\n");
 			return;
 		}
 	}
 	printf("%d\t", pos);
-	printStructPrefix(list);
-	if (list.next > 0) {
-		printStructPrefixList(pos + 1, *list.next);
+	printStructPrefix(*list);
+	if (list->next > 0) {
+		printStructPrefixList(pos + 1, list->next);
 	}
 
 }
 
-struct prefix parseIpFromChar(char* line) {
+struct prefix* parseIpFromChar(char* line) {
 	unsigned int bytes[4];
 	unsigned int len;
 	//printf("%s\n", line);
@@ -63,8 +64,9 @@ struct prefix parseIpFromChar(char* line) {
 	ip |= bytes[1] << 8;
 	ip |= bytes[2] << 16;
 	ip |= bytes[3] << 24;
-	struct prefix ret;
-	ret.ip = ip;
-	ret.len = len;
+	struct prefix *ret =  (struct prefix*)malloc(sizeof(struct prefix));
+	ret->ip = ip;
+	ret->len = len;
+	ret->next = NULL;
 	return ret;
 }

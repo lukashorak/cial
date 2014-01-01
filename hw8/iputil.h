@@ -16,7 +16,7 @@ struct prefix {
 
 void print_ip_with_len(unsigned int ip, unsigned char len);
 void printStructPrefix(struct prefix p);
-struct prefix parseIpFromChar(char* line);
-void printStructPrefixList(int pos, struct prefix list);
+struct prefix* parseIpFromChar(char* line);
+void printStructPrefixList(int pos, struct prefix *list);
 
 #endif /* IPUTIL_H_ */
