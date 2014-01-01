@@ -116,48 +116,13 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 	return list;
 }
 
-//struct prefix* addSortedByPrefix(struct prefix *new, struct prefix *list) {
-//	struct prefix *curr = list;
-//	struct prefix *prev = NULL;
-//	printf("Adding [%u / %u] \n", new->ip, new->len);
-//
-//	while (curr != NULL) {
-//		if (curr->ip > new->ip) {
-//			break;
-//		} else {
-//			prev = curr;
-//			curr = curr->next;
-//		}
-//	}
-//	//new->next = NULL;
-//
-//	//TODO - decide if it's first, last or in middle
-//	if (list == NULL || (list->ip == 0 && list->len == 0)) {
-//		list = new;
-//		printf("ADDED NEW LIST!\n");
-//	} else if (prev == NULL) {
-//		new->next = list;
-//		list = new;
-//		printf("ADDED FIRST!\n");
-//	} else if (prev->next == NULL) {
-//		prev->next = new;
-//		printf("ADDED LAST!\n");
-//	} else {
-//		new->next = curr;
-//		prev->next = new;
-//		printf("ADDED MIDDLE!\n");
-//	}
-//
-//	return list;
-//}
-
 struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	struct prefix *curr = list;
 	struct prefix *prev = NULL;
 	int found = 0;
 
-	printf("\nDeleting [%u / %u] \t", ip, len);
+	printf("Deleting [%u / %u] \t", ip, len);
 	removeCounter = 0;
 	while (curr != NULL) {
 		removeCounter++;
@@ -172,19 +137,25 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	if (found) {
 		removeFrequency[removeCounter]++;
-		//TODO - decide if it's first, last or in middle
-		if (prev == NULL) {
-			//todo free
+		printf("%d\t", removeCounter);
+		//Decide if it's first, last or in middle
+		if (curr == NULL) {
+			printf("EMPTY!\n");
+		} else if (prev == NULL) {
+			//FIXME free
 			//free(list);
+			printf("DELETED HEAD!\n");
 			list = list->next;
 		} else if (curr->next == NULL) {
+			printf("DELETED LAST!\n");
 			prev->next = NULL;
 			free(curr);
 		} else {
+			printf("DELETED MIDDLE!\n");
 			prev->next = curr->next;
 			free(curr);
 		}
-		printf("DELETED! %d\n", removeCounter);
+
 	} else {
 		printf("NOTHING!\n");
 	}
@@ -383,7 +354,7 @@ void printSummary() {
 	printf("==== SUMMARY ====\n");
 
 	int i;
-	for (i = 0; i < 5000; i++) {
+	for (i = 0; i < 90000; i++) {
 		printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
 	}
 	printf("Insert:\t%d\n", insertCounter);
@@ -394,32 +365,32 @@ void printSummary() {
 void run() {
 	char* routingName = "routing_table";
 	char* insertName = "inserted_prefixes";
-	char* removeName = "routing_table";
+	char* removeName = "deleted_prefixes";
 
 	int lineCount = 0;
 	struct prefix *routingList = input(routingName, &lineCount);
 	struct prefix *insertList = input(insertName, &lineCount);
 	struct prefix *removeList = input(removeName, &lineCount);
 
+	//printStructPrefixList(routingList);
+
+	struct prefix *curr = insertList;
+	while (curr != NULL) {
+		routingList = addSorted(curr->ip, curr->len, routingList);
+		curr = curr->next;
+	}
+
+	//printStructPrefixList(routingList);
+
+	curr = removeList;
+	while (curr != NULL) {
+		routingList = delete(curr->ip, curr->len, routingList);
+		curr = curr->next;
+	}
+
 	printStructPrefixList(routingList);
 
-//	struct prefix *curr = insertList;
-//	while (curr != NULL) {
-//		routingList = addSorted(curr->ip, curr->len, routingList);
-//		curr = curr->next;
-//	}
-
-	//printStructPrefixList(0, routingList);
-
-//	curr = removeList;
-//	while (curr != NULL) {
-//		routingList = delete(curr->ip, curr->len, routingList);
-//		curr = curr->next;
-//	}
-//
-//	printStructPrefixList(0, routingList);
-
-	//printSummary();
+	printSummary();
 }
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
