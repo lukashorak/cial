@@ -86,6 +86,14 @@ void segment(int d, struct prefix *list) {
 	}
 }
 
+void userSearch(struct prefix *list) {
+	printf("Search for prefix(ex:1.2.3.4/32) :");
+	char line[1024];
+	scanf("%[^\n]", line);
+	struct prefix* ip = parseIpFromChar(line);
+	search(ip->ip, ip->len, list);
+}
+
 void testParse() {
 
 	struct prefix p1;
@@ -197,9 +205,10 @@ void run() {
 		curr = curr->next;
 	}
 
-	printStructPrefixList(routingList);
+	//printStructPrefixList(routingList);
 
-	printSummary();
+	//printSummary();
+	userSearch(routingList);
 }
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
