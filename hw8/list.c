@@ -173,8 +173,20 @@ void printSummary() {
 	printf("==== SUMMARY ====\n");
 
 	int i;
-	for (i = 0; i < 90000; i++) {
-		printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
+	int group = 0;
+	int size = 1000;
+	int insertGroup = 0;
+	int removeGroup = 0;
+	for (i = 0; i < 35000; i++) {
+		//printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
+		group = i / size;
+		insertGroup += insertFrequency[i];
+		removeGroup += removeFrequency[i];
+		if (i % size == 0) {
+			printf("%d\t%d\t%d\n", group, insertGroup, removeGroup);
+			insertGroup = 0;
+			removeGroup = 0;
+		}
 	}
 	printf("Insert:\t%d\n", insertCounter);
 	printf("Search:\t%d\n", searchCounter);

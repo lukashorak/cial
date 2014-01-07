@@ -183,11 +183,13 @@ void run() {
 	char* routingName = "routing_table";
 	char* insertName = "inserted_prefixes";
 	char* removeName = "deleted_prefixes";
+	char* searchName = "trace_file.txt";
 
 	int lineCount = 0;
 	struct prefix *routingList = input(routingName, &lineCount);
 	struct prefix *insertList = input(insertName, &lineCount);
 	struct prefix *removeList = input(removeName, &lineCount);
+	struct prefix *searchList = input(searchName, &lineCount);
 
 	//printStructPrefixList(routingList);
 
@@ -207,15 +209,16 @@ void run() {
 
 	//printStructPrefixList(routingList);
 
-	//printSummary();
-	userSearch(routingList);
+	printSummary();
+	//userSearch(routingList);
 }
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 //testParse();
-	//testRead();
+	testRead();
 //testList();
-	run();
+	//run();
+	clockTest();
 	printf("Finished\n");
 	return 0;
 }
