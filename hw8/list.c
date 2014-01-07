@@ -9,12 +9,14 @@
 #include <stdio.h>
 #include "iputil.h"
 #include "list.h"
+#include "clock.h"
 
-int insertCounter = 0;
-int insertFrequency[100000] = { 0 };
-int searchCounter = 0;
-int removeCounter = 0;
-int removeFrequency[100000] = { 0 };
+unsigned int insertCounter = 0;
+unsigned long long int insertFrequency[100000] = { 0 };
+unsigned int searchCounter = 0;
+unsigned long long int searchFrequency[100000] = { 0 };
+unsigned int removeCounter = 0;
+unsigned long long int removeFrequency[100000] = { 0 };
 
 struct prefix* input(char* fileName, int *lc) {
 	struct prefix *list = (struct prefix*) malloc(sizeof(struct prefix));
@@ -60,9 +62,11 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 	struct prefix *prev = NULL;
 	printf("Adding [%u / %u] \n", ip, len);
 
-	insertCounter = 0;
+	//Start clock cycle count
+	unsigned long long int begin, end;
+	begin = rdtsc();
 	while (curr != NULL) {
-		insertCounter++;
+
 		if (curr->ip > ip) {
 			break;
 		} else {
@@ -70,13 +74,14 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 			curr = curr->next;
 		}
 	}
-	insertFrequency[insertCounter]++;
+	//End clock cycle count
+	end = rdtsc();
+	//insertFrequency[(begin - end)]++;
 	struct prefix *new = (struct prefix*) malloc(sizeof(struct prefix));
 	new->ip = ip;
 	new->len = len;
 	new->next = NULL;
 
-	printf("%d\t", insertCounter);
 	//TODO - decide if it's first, last or in middle
 	if (list == NULL || (list->ip == 0 && list->len == 0)) {
 		list = new;
@@ -93,6 +98,9 @@ struct prefix* addSorted(unsigned int ip, unsigned char len,
 		prev->next = new;
 		printf("ADDED MIDDLE!\n");
 	}
+	insertCounter++;
+	insertFrequency[insertCounter] = (end - begin);
+	printf("%llu %llu %llu\n", begin, end, (end - begin));
 
 	return list;
 }
@@ -104,9 +112,11 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 	int found = 0;
 
 	printf("Deleting [%u / %u] \t", ip, len);
-	removeCounter = 0;
+
+	//Start clock cycle count
+	unsigned long long int begin, end;
+	begin = rdtsc();
 	while (curr != NULL) {
-		removeCounter++;
 		if (curr->ip == ip && curr->len == len) {
 			found = 1;
 			break;
@@ -115,10 +125,10 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 			curr = curr->next;
 		}
 	}
+	//End clock cycle count
+	end = rdtsc();
 
 	if (found) {
-		removeFrequency[removeCounter]++;
-		printf("%d\t", removeCounter);
 		//Decide if it's first, last or in middle
 		if (curr == NULL) {
 			printf("EMPTY!\n");
@@ -140,6 +150,9 @@ struct prefix* delete(unsigned int ip, unsigned char len, struct prefix *list) {
 	} else {
 		printf("NOTHING!\n");
 	}
+	removeCounter++;
+	removeFrequency[removeCounter] = (end - begin);
+	printf("%llu %llu %llu\n", begin, end, (end - begin));
 
 	return list;
 }
@@ -151,6 +164,9 @@ struct prefix* search(unsigned int ip, unsigned char len, struct prefix *list) {
 
 	printf("Searching the list for value [%u / %u]\t", ip, len);
 
+	//Start clock cycle count
+	unsigned long long int begin, end;
+	begin = rdtsc();
 	while (curr != NULL) {
 		if (curr->ip == ip && curr->len == len) {
 			found = 1;
@@ -159,6 +175,12 @@ struct prefix* search(unsigned int ip, unsigned char len, struct prefix *list) {
 			curr = curr->next;
 		}
 	}
+	//End clock cycle count
+	end = rdtsc();
+
+	searchCounter++;
+	searchFrequency[searchCounter] = (end - begin);
+	printf("%llu %llu %llu\n", begin, end, (end - begin));
 
 	if (found) {
 		printf("FOUND!\n");
@@ -169,26 +191,65 @@ struct prefix* search(unsigned int ip, unsigned char len, struct prefix *list) {
 	}
 }
 
-void printSummary() {
+void printSummary2() {
 	printf("==== SUMMARY ====\n");
 
 	int i;
 	int group = 0;
-	int size = 1000;
+	int size = 100;
 	int insertGroup = 0;
 	int removeGroup = 0;
+	int searchGroup = 0;
 	for (i = 0; i < 35000; i++) {
 		//printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
 		group = i / size;
 		insertGroup += insertFrequency[i];
 		removeGroup += removeFrequency[i];
+		searchGroup += searchFrequency[i];
 		if (i % size == 0) {
-			printf("%d\t%d\t%d\n", group, insertGroup, removeGroup);
+			printf("%ud\t%ud\t%ud\t%ud\n", group, insertGroup, removeGroup,
+					searchGroup);
 			insertGroup = 0;
 			removeGroup = 0;
+			searchGroup = 0;
 		}
 	}
-	printf("Insert:\t%d\n", insertCounter);
-	printf("Search:\t%d\n", searchCounter);
-	printf("Remove:\t%d\n", removeCounter);
+	printf("Insert:\t%ud\n", insertCounter);
+	printf("Remove:\t%ud\n", removeCounter);
+	printf("Search:\t%ud\n", searchCounter);
+}
+void printSummary() {
+	printf("==== SUMMARY ====\n");
+
+	FILE * fout;
+	fout = fopen("file.out", "w+");
+
+	int i;
+	unsigned int insertGroup, removeGroup, searchGroup;
+	for (i = 0; i < 90000; i++) {
+		//printf("%d\t%d\t%d\n", i, insertFrequency[i], removeFrequency[i]);
+
+//		if (i < = searchCounter){
+//			searchGroup = searchFrequency[i];
+//		}else{
+//			searchGroup = 0;
+//		}
+
+		insertGroup = (i <= insertCounter) ? insertFrequency[i] : 0;
+		removeGroup = (i <= removeCounter) ? removeFrequency[i] : 0;
+		searchGroup = (i <= searchCounter) ? searchFrequency[i] : 0;
+		//insertGroup += insertFrequency[i];
+		//removeGroup += removeFrequency[i];
+		//searchGroup += searchFrequency[i];
+		if (insertGroup > 0 || removeGroup > 0 || searchGroup > 0)
+			printf("%u\t%u\t%u\t%u\n", i, insertGroup, removeGroup,
+					searchGroup);
+		fprintf(fout,"%u\t%u\t%u\t%u\n", i, insertGroup, removeGroup,
+					searchGroup);
+	}
+
+	fclose(fout);
+	printf("Insert:\t%ud\n", insertCounter);
+	printf("Remove:\t%ud\n", removeCounter);
+	printf("Search:\t%ud\n", searchCounter);
 }
