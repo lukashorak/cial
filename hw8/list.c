@@ -149,7 +149,7 @@ struct prefix* search(unsigned int ip, unsigned char len, struct prefix *list) {
 	struct prefix *curr = list;
 	int found = 0;
 
-	printf("\nSearching the list for value [%u / %u] \n", ip, len);
+	printf("Searching the list for value [%u / %u]\t", ip, len);
 
 	while (curr != NULL) {
 		if (curr->ip == ip && curr->len == len) {

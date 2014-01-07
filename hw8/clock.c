@@ -2,8 +2,6 @@
 #include<stdio.h>
 #include "clock.h"
 
-unsigned long long int begin,end;
-
 inline unsigned long long int rdtsc()//32-bit
 {
 	unsigned long long int x;
@@ -21,13 +19,3 @@ inline unsigned long long int rdtsc_64bits()//64-bit
    return ((unsigned long long)a) | (((unsigned long long)d) << 32);
 }
 
-void clockTest(){
-
-	begin = rdtsc_64bits();
-	/*---------------------------
-	your function
-	---------------------------*/
-	end = rdtsc_64bits();
-	
-	printf("Execute cycles %llu \n",(end-begin));
-}

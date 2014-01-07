@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "iputil.h"
 #include "list.h"
+#include "clock.h"
 
 void length_distribution(struct prefix *list, unsigned int distribution[33]) {
 
@@ -207,17 +208,34 @@ void run() {
 		curr = curr->next;
 	}
 
+	curr = searchList;
+		while (curr != NULL) {
+			search(curr->ip, curr->len, searchList);
+			curr = curr->next;
+		}
+
 	//printStructPrefixList(routingList);
 
 	printSummary();
 	//userSearch(routingList);
 }
+
+void clockTest() {
+	unsigned long long int begin,end;
+	begin = rdtsc_64bits();
+	/*---------------------------
+	 your function
+	 ---------------------------*/
+	end = rdtsc_64bits();
+
+	printf("Execute cycles %llu \n", (end - begin));
+}
 int main(int argc, const char* argv[]) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 //testParse();
-	testRead();
+	//testRead();
 //testList();
-	//run();
+	run();
 	clockTest();
 	printf("Finished\n");
 	return 0;
