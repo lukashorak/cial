@@ -210,7 +210,7 @@ void run() {
 
 	curr = searchList;
 		while (curr != NULL) {
-			search(curr->ip, curr->len, searchList);
+			search(curr->ip, curr->len, routingList);
 			curr = curr->next;
 		}
 

@@ -241,11 +241,12 @@ void printSummary() {
 		//insertGroup += insertFrequency[i];
 		//removeGroup += removeFrequency[i];
 		//searchGroup += searchFrequency[i];
-		if (insertGroup > 0 || removeGroup > 0 || searchGroup > 0)
+		if (insertGroup > 0 || removeGroup > 0 || searchGroup > 0) {
 			printf("%u\t%u\t%u\t%u\n", i, insertGroup, removeGroup,
 					searchGroup);
-		fprintf(fout,"%u\t%u\t%u\t%u\n", i, insertGroup, removeGroup,
+			fprintf(fout, "%u\t%u\t%u\t%u\n", i, insertGroup, removeGroup,
 					searchGroup);
+		}
 	}
 
 	fclose(fout);
